@@ -1,0 +1,714 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PUCU LIBRARY SUITE - Student Portal</title>
+  <style>
+    :root {
+      --primary: #15803d;
+      --primary-hover: #166534;
+      --primary-light: #f0fdf4;
+      --bg-app: #fcfdfc;
+      --card-bg: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-app); color: var(--text-dark); min-height: 100vh; display: flex; flex-direction: column; }
+    .logo-icon { width: 42px; height: 42px; fill: var(--primary); }
+
+    #authScreen { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 100%); padding: 1.5rem; }
+    .auth-card { background: var(--card-bg); padding: 2.5rem; border-radius: 16px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08); width: 100%; max-width: 480px; text-align: center; border: 1px solid var(--border); }
+    .tagline { font-size: 0.85rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1.2px; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    .auth-card h1 { font-size: 1.75rem; color: var(--text-dark); margin-bottom: 0.2rem; }
+    .auth-card .powered-by { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 1.5rem; text-transform: uppercase; }
+    .form-group { text-align: left; margin-bottom: 1.1rem; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+    
+    .label-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+    .forgot-link { font-size: 0.8rem; color: var(--primary); font-weight: 600; text-decoration: none; cursor: pointer; }
+    .forgot-link:hover { text-decoration: underline; }
+
+    .form-input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; outline: none; }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15); }
+    .auth-toggle { margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted); }
+    .auth-toggle a { color: var(--primary); font-weight: 700; text-decoration: none; cursor: pointer; }
+
+    #appScreen { display: none; flex-direction: column; min-height: 100vh; }
+    header { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+    .header-brand-box { display: flex; align-items: center; gap: 0.75rem; }
+    .branding h1 { font-size: 1.35rem; color: var(--primary); }
+    .branding p { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .user-header { display: flex; align-items: center; gap: 1rem; }
+    .user-badge { background: var(--primary-light); color: var(--primary); padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+    
+    .app-container { max-width: 1300px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 320px 1fr; gap: 2rem; width: 100%; flex: 1; }
+    .btn { padding: 0.65rem 1.25rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-warning { background-color: var(--warning); color: white; }
+    .btn-warning:hover { background-color: #b45309; }
+    .btn-disabled { background-color: #e2e8f0; color: #64748b; cursor: not-allowed; }
+    .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-dark); }
+    .btn-outline:hover { background-color: #f3f4f6; }
+
+    .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow); }
+    .card-title { font-size: 1.1rem; color: var(--primary); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary-light); }
+    .tab-menu { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .tab-btn { background: none; border: none; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 0.3rem 0.6rem; border-radius: 4px; position: relative; }
+    .tab-btn.active { background-color: var(--primary-light); color: var(--primary); }
+    
+    .notif-badge { display: none; width: 8px; height: 8px; background-color: #dc2626; border-radius: 50%; position: absolute; top: 2px; right: 2px; }
+    .notif-badge.active { display: inline-block; }
+
+    .tab-content { display: none; font-size: 0.85rem; }
+    .tab-content.active { display: block; }
+    .list-item { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .list-item:last-child { border-bottom: none; }
+    .item-title { font-weight: 600; color: var(--text-dark); }
+    .item-sub { color: var(--text-muted); font-size: 0.8rem; }
+    .announcement-box { background: var(--primary-light); border-left: 4px solid var(--primary); padding: 0.75rem; border-radius: 4px; margin-bottom: 0.75rem; font-size: 0.85rem; }
+
+    .due-alert-box {
+      background: #fef2f2;
+      border-left: 3px solid var(--danger);
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      margin-top: 0.4rem;
+      color: var(--danger);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .main-view { display: flex; flex-direction: column; gap: 1.5rem; }
+    .search-card { background: var(--card-bg); border: 1px solid var(--border); padding: 1.25rem; border-radius: 12px; box-shadow: var(--shadow); }
+    .search-input { width: 100%; padding: 0.85rem 1.25rem; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; }
+    .search-input:focus { border-color: var(--primary); }
+    .search-stats { margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted); }
+    .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+    .book-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow); }
+    .book-badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; width: fit-content; }
+    .badge-available { background: var(--primary-light); color: var(--primary); }
+    .badge-borrowed { background: #fef3c7; color: var(--warning); }
+    .book-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .book-author { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .book-genre { font-size: 0.8rem; background: #f3f4f6; padding: 0.2rem 0.5rem; border-radius: 4px; display: inline-block; margin-bottom: 1rem; font-weight: 600; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 100; justify-content: center; align-items: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: var(--card-bg); border-top: 5px solid var(--primary); border-radius: 12px; width: 90%; max-width: 440px; padding: 1.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+
+    footer { background: var(--card-bg); border-top: 1px solid var(--border); padding: 2rem; margin-top: auto; }
+    .footer-content { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <!-- AUTHENTICATION -->
+  <div id="authScreen">
+    <div class="auth-card">
+      <svg class="logo-icon" viewBox="0 0 24 24"><path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"/></svg>
+      <div class="tagline">SMART LEARNING AT YOUR FINGERTIPS.</div>
+      <h1>PUCU LIBRARY SUITE</h1>
+      <div class="powered-by">Powered by: E-LIFO SOLUTIONS</div>
+
+      <form id="signInForm">
+        <div class="form-group">
+          <label for="loginStudentId">Student ID Number</label>
+          <input type="text" id="loginStudentId" class="form-input" placeholder="e.g., 2026-1082" required>
+        </div>
+        <div class="form-group">
+          <div class="label-wrapper">
+            <label for="loginPassword" style="margin-bottom: 0;">Password</label>
+            <a class="forgot-link" onclick="openForgotModal()">Forgot Password?</a>
+          </div>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+        <div class="auth-toggle">
+          Don't have an account? <a onclick="toggleAuthMode('register')">Create New Account</a>
+        </div>
+      </form>
+
+      <form id="registerForm" style="display: none;">
+        <div class="form-group">
+          <label for="regStudentId">Student ID Number</label>
+          <input type="text" id="regStudentId" class="form-input" placeholder="e.g., 2026-1082" required>
+        </div>
+        <div class="form-group">
+          <label for="regFullName">Full Name</label>
+          <input type="text" id="regFullName" class="form-input" placeholder="e.g., Jane Doe" required>
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Email Address</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="student@pucu.edu.ph" required>
+        </div>
+        <div class="form-group">
+          <label for="regLibCard">Library Card Number</label>
+          <input type="text" id="regLibCard" class="form-input" placeholder="e.g., LIB-99201" required>
+        </div>
+        <div class="form-group">
+          <label for="regContact">Contact Number</label>
+          <input type="tel" id="regContact" class="form-input" placeholder="e.g., 09171234567" required>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Create Password</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="Create password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+        <div class="auth-toggle">
+          Already registered? <a onclick="toggleAuthMode('login')">Sign In Instead</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP SCREEN -->
+  <div id="appScreen">
+    <header>
+      <div class="header-brand-box">
+        <svg class="logo-icon" viewBox="0 0 24 24"><path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"/></svg>
+        <div class="branding">
+          <h1>PUCU LIBRARY SUITE</h1>
+          <p>Powered by: E-LIFO SOLUTIONS</p>
+        </div>
+      </div>
+      <div class="user-header">
+        <span class="user-badge" id="displayStudentId">ID: 2026-1082</span>
+        <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="logout()">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="card">
+          <h2 class="card-title">Student Profile</h2>
+          <div class="tab-menu">
+            <button class="tab-btn active" onclick="switchTab('history')">History</button>
+            <button class="tab-btn" onclick="switchTab('due')">
+              Due Dates <span class="notif-badge" id="dueDot"></span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('reminders')">
+              Reminders <span class="notif-badge" id="reminderDot"></span>
+            </button>
+          </div>
+
+          <div id="historyTab" class="tab-content active">
+            <div id="historyList"></div>
+          </div>
+
+          <div id="dueTab" class="tab-content">
+            <div id="activeDueList"></div>
+          </div>
+
+          <div id="remindersTab" class="tab-content">
+            <div id="remindersList"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Announcements</h2>
+          <div id="publicAnnouncementsList"></div>
+        </div>
+      </aside>
+
+      <main class="main-view">
+        <div class="search-card">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by keywords, title, author, or genre...">
+          <div class="search-stats" id="searchStats">Showing all books</div>
+        </div>
+
+        <div class="books-grid" id="booksGrid"></div>
+      </main>
+    </div>
+
+    <footer>
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--primary);">Library Contact Information</h3>
+          <p>Location: PUCU Library | Phone: 09272216584</p>
+        </div>
+        <div style="text-align: right;">
+          <h3 style="color: var(--primary);">PUCU LIBRARY SUITE</h3>
+          <p>Powered by: E-LIFO SOLUTIONS</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- BORROW MODAL -->
+  <div class="modal-overlay" id="borrowModal">
+    <div class="modal-card">
+      <h2 id="modalBookTitle">Borrow Book</h2>
+      <p id="modalBookAuthor">Please select your requested borrow dates.</p>
+      
+      <form id="borrowForm">
+        <div class="form-group">
+          <label for="borrowDate">Date to Borrow</label>
+          <input type="date" id="borrowDate" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="returnDate">Expected Return Date</label>
+          <input type="date" id="returnDate" class="form-input" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeBorrowModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Borrow</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD MODAL -->
+  <div class="modal-overlay" id="forgotModal">
+    <div class="modal-card">
+      <h2>Reset Password via Email OTP</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem; margin-bottom: 1.25rem;">Enter your registered email address to receive a One-Time Verification Code (OTP).</p>
+      
+      <form id="otpRequestForm">
+        <div class="form-group">
+          <label for="forgotEmail">Registered Email Address</label>
+          <input type="email" id="forgotEmail" class="form-input" placeholder="student@pucu.edu.ph" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeForgotModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Send OTP Code</button>
+        </div>
+      </form>
+
+      <form id="otpVerifyForm" style="display: none;">
+        <div class="form-group">
+          <label for="inputOtp">6-Digit OTP Code</label>
+          <input type="text" id="inputOtp" class="form-input" placeholder="Enter 6-digit OTP" maxlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="forgotNewPassword">New Password</label>
+          <input type="password" id="forgotNewPassword" class="form-input" placeholder="Enter new password" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeForgotModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Verify & Reset Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const defaultBooks = [
+      { id: 1, title: "Accounting Principles", author: "Jerry J. Weygandt", year: 2022, genre: "Accounting Textbook", available: true },
+      { id: 2, title: "Financial Accounting", author: "Robert Libby", year: 2023, genre: "Financial Accounting", available: false },
+      { id: 3, title: "Managerial Accounting", author: "Ray H. Garrison", year: 2020, genre: "Managerial Accounting", available: true },
+      { id: 4, title: "Campbell Biology", author: "Lisa A. Urry", year: 2020, genre: "Biology", available: true },
+      { id: 5, title: "Conceptual Physics", author: "Paul G. Hewitt", year: 2023, genre: "Physics", available: true },
+      { id: 6, title: "Calculus", author: "James Stewart", year: 2020, genre: "Calculus", available: false },
+      { id: 7, title: "Introduction to Algorithms", author: "Thomas H. Cormen", year: 2022, genre: "Computer Science", available: true },
+      { id: 8, title: "Principles of Economics", author: "N. Gregory Mankiw", year: 2021, genre: "Economics", available: true },
+      { id: 9, title: "Organic Chemistry", author: "David R. Klein", year: 2021, genre: "Chemistry", available: true },
+      { id: 10, title: "Human Anatomy & Physiology", author: "Elaine N. Marieb", year: 2019, genre: "Medicine / Biology", available: true },
+      { id: 11, title: "World History: Patterns of Interaction", author: "Roger B. Beck", year: 2018, genre: "History", available: true },
+      { id: 12, title: "Psychology", author: "David G. Myers", year: 2021, genre: "Psychology", available: true }
+    ];
+
+    const defaultAnnouncements = [
+      { id: 1, title: "📚 New Arrivals!", text: "2023 Editions for Accounting and Science textbooks are now available for borrowing." }
+    ];
+
+    function getStoredData(key, fallback) {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : fallback;
+    }
+
+    function saveData(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    let books = getStoredData('pucu_books', defaultBooks);
+    let borrowLogs = getStoredData('pucu_borrows', []);
+    let returnHistory = getStoredData('pucu_history', []);
+    let studentRequests = getStoredData('pucu_requests', []);
+    let announcements = getStoredData('pucu_announcements', defaultAnnouncements);
+    let studentReminders = getStoredData('pucu_reminders', []);
+    let dueAlerts = getStoredData('pucu_due_alerts', {});
+    let registeredUsers = getStoredData('pucu_users', {});
+    
+    let activeStudentId = "2026-1082";
+    let selectedBookId = null;
+    let generatedOtp = null;
+    let targetEmail = null;
+
+    window.addEventListener('storage', () => {
+      books = getStoredData('pucu_books', defaultBooks);
+      borrowLogs = getStoredData('pucu_borrows', []);
+      returnHistory = getStoredData('pucu_history', []);
+      studentRequests = getStoredData('pucu_requests', []);
+      announcements = getStoredData('pucu_announcements', defaultAnnouncements);
+      studentReminders = getStoredData('pucu_reminders', []);
+      dueAlerts = getStoredData('pucu_due_alerts', {});
+      registeredUsers = getStoredData('pucu_users', {});
+
+      renderBooks(books);
+      renderProfileDues();
+      renderHistory();
+      renderAnnouncements();
+      renderReminders();
+    });
+
+    const authScreen = document.getElementById('authScreen');
+    const appScreen = document.getElementById('appScreen');
+    const signInForm = document.getElementById('signInForm');
+    const registerForm = document.getElementById('registerForm');
+    const booksGrid = document.getElementById('booksGrid');
+    const searchInput = document.getElementById('searchInput');
+    const searchStats = document.getElementById('searchStats');
+
+    function toggleAuthMode(mode) {
+      signInForm.style.display = mode === 'register' ? 'none' : 'block';
+      registerForm.style.display = mode === 'register' ? 'block' : 'none';
+    }
+
+    signInForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const idVal = document.getElementById('loginStudentId').value.trim();
+      const passVal = document.getElementById('loginPassword').value.trim();
+
+      if (registeredUsers[idVal] && registeredUsers[idVal].password !== passVal) {
+        alert("Incorrect password. Please try again or click 'Forgot Password?'");
+        return;
+      }
+
+      activeStudentId = idVal;
+      authenticateUser();
+    });
+
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const idVal = document.getElementById('regStudentId').value.trim();
+      
+      const userData = {
+        fullName: document.getElementById('regFullName').value.trim(),
+        email: document.getElementById('regEmail').value.trim(),
+        libCard: document.getElementById('regLibCard').value.trim(),
+        contact: document.getElementById('regContact').value.trim(),
+        password: document.getElementById('regPassword').value.trim()
+      };
+
+      registeredUsers[idVal] = userData;
+      saveData('pucu_users', registeredUsers);
+
+      activeStudentId = idVal;
+      alert("Account successfully created!");
+      authenticateUser();
+    });
+
+    function openForgotModal() {
+      document.getElementById('otpRequestForm').reset();
+      document.getElementById('otpVerifyForm').reset();
+      document.getElementById('otpRequestForm').style.display = 'block';
+      document.getElementById('otpVerifyForm').style.display = 'none';
+      document.getElementById('forgotModal').classList.add('active');
+    }
+
+    function closeForgotModal() {
+      document.getElementById('forgotModal').classList.remove('active');
+    }
+
+    document.getElementById('otpRequestForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      targetEmail = document.getElementById('forgotEmail').value.trim();
+      generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      alert(`[PUCU SYSTEM NOTIFICATION]\n\nAn OTP email has been sent to: ${targetEmail}\n\nYour 6-digit OTP Code is: ${generatedOtp}`);
+
+      document.getElementById('otpRequestForm').style.display = 'none';
+      document.getElementById('otpVerifyForm').style.display = 'block';
+    });
+
+    document.getElementById('otpVerifyForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const enteredOtp = document.getElementById('inputOtp').value.trim();
+      const newPassword = document.getElementById('forgotNewPassword').value.trim();
+
+      if (enteredOtp !== generatedOtp) {
+        alert("Invalid OTP Code!");
+        return;
+      }
+
+      let foundStudentId = null;
+      Object.keys(registeredUsers).forEach(studentId => {
+        if (registeredUsers[studentId].email === targetEmail) {
+          foundStudentId = studentId;
+        }
+      });
+
+      if (foundStudentId) {
+        registeredUsers[foundStudentId].password = newPassword;
+        saveData('pucu_users', registeredUsers);
+        alert(`Success! Password for Student ID (${foundStudentId}) updated.`);
+      } else {
+        alert("Password updated successfully!");
+      }
+
+      closeForgotModal();
+    });
+
+    function authenticateUser() {
+      document.getElementById('displayStudentId').textContent = `ID: ${activeStudentId}`;
+      authScreen.style.display = 'none';
+      appScreen.style.display = 'flex';
+      renderBooks(books);
+      renderProfileDues();
+      renderHistory();
+      renderAnnouncements();
+      renderReminders();
+    }
+
+    function logout() {
+      appScreen.style.display = 'none';
+      authScreen.style.display = 'flex';
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      if (tabName === 'history') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('historyTab').classList.add('active');
+      } else if (tabName === 'due') {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('dueTab').classList.add('active');
+        document.getElementById('dueDot').classList.remove('active');
+      } else if (tabName === 'reminders') {
+        document.querySelectorAll('.tab-btn')[2].classList.add('active');
+        document.getElementById('remindersTab').classList.add('active');
+        document.getElementById('reminderDot').classList.remove('active');
+      }
+    }
+
+    function renderProfileDues() {
+      const container = document.getElementById('activeDueList');
+      const myDues = borrowLogs.filter(b => b.studentId === activeStudentId);
+      container.innerHTML = '';
+
+      let hasActiveReminder = false;
+
+      if (myDues.length === 0) {
+        container.innerHTML = '<div class="list-item"><div class="item-sub">No currently borrowed books.</div></div>';
+        return;
+      }
+
+      myDues.forEach(item => {
+        const alertKey = `${activeStudentId}_${item.bookTitle}`;
+        const hasAlert = dueAlerts[alertKey];
+
+        if (hasAlert) hasActiveReminder = true;
+
+        container.innerHTML += `
+          <div class="list-item">
+            <div class="item-title">${item.bookTitle}</div>
+            <div class="item-sub" style="color: var(--warning); font-weight: 600;">Due: ${item.returnDate}</div>
+            ${hasAlert ? `<div class="due-alert-box">🚨 ${hasAlert}</div>` : ''}
+          </div>
+        `;
+      });
+
+      if (hasActiveReminder) {
+        document.getElementById('dueDot').classList.add('active');
+      }
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      const myHistory = returnHistory.filter(h => h.studentId === activeStudentId);
+      
+      container.innerHTML = '';
+      if (myHistory.length === 0) {
+        container.innerHTML = '<div class="list-item"><div class="item-sub">No completed return history yet.</div></div>';
+        return;
+      }
+
+      myHistory.forEach(item => {
+        container.innerHTML += `
+          <div class="list-item">
+            <div class="item-title">${item.bookTitle}</div>
+            <div class="item-sub">Returned: ${item.returnDate} (${item.status || 'Returned'})</div>
+          </div>
+        `;
+      });
+    }
+
+    function renderAnnouncements() {
+      const container = document.getElementById('publicAnnouncementsList');
+      container.innerHTML = '';
+
+      if (announcements.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color: var(--text-muted);">No active announcements.</p>';
+        return;
+      }
+
+      announcements.forEach(a => {
+        container.innerHTML += `
+          <div class="announcement-box">
+            <strong>${a.title}</strong>
+            <p style="margin-top: 0.2rem;">${a.text}</p>
+          </div>
+        `;
+      });
+    }
+
+    function renderReminders() {
+      const container = document.getElementById('remindersList');
+      const myReminders = studentReminders.filter(r => r.studentId === activeStudentId);
+      
+      container.innerHTML = '';
+
+      if (myReminders.length > 0) {
+        document.getElementById('reminderDot').classList.add('active');
+      }
+
+      myReminders.forEach(r => {
+        container.innerHTML += `
+          <div class="list-item">
+            <div class="item-title">🔔 ${r.title}</div>
+            <div class="item-sub" style="color: var(--text-dark); font-weight:600;">${r.message}</div>
+            <div class="item-sub">${r.date}</div>
+          </div>
+        `;
+      });
+
+      if (myReminders.length === 0) {
+        container.innerHTML = `
+          <div class="list-item">
+            <div class="item-title">🔔 System Alert</div>
+            <div class="item-sub">Please return books within 14 days to avoid fines.</div>
+          </div>
+        `;
+      }
+    }
+
+    function renderBooks(filteredBooks) {
+      booksGrid.innerHTML = '';
+      searchStats.textContent = `Showing ${filteredBooks.length} of ${books.length} books`;
+
+      filteredBooks.forEach(book => {
+        const isBorrowedByMe = borrowLogs.some(l => l.studentId === activeStudentId && l.bookTitle === book.title);
+
+        let actionButtonHtml = '';
+        let badgeHtml = '';
+
+        if (book.available) {
+          badgeHtml = `<span class="book-badge badge-available">Available</span>`;
+          actionButtonHtml = `<button class="btn btn-primary" style="width:100%;" onclick="openBorrowModal(${book.id})">Borrow Book</button>`;
+        } else if (isBorrowedByMe) {
+          badgeHtml = `<span class="book-badge badge-borrowed">Borrowed by You</span>`;
+          actionButtonHtml = `<button class="btn btn-disabled" style="width:100%;" disabled>Currently Borrowed by You</button>`;
+        } else {
+          badgeHtml = `<span class="book-badge badge-borrowed">Currently Borrowed</span>`;
+          actionButtonHtml = `<button class="btn btn-warning" style="width:100%;" onclick="requestBook(${book.id})">Request Book</button>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.innerHTML = `
+          <div>
+            ${badgeHtml}
+            <h3 class="book-title">${book.title}</h3>
+            <p class="book-author">by ${book.author} (${book.year})</p>
+            <span class="book-genre">${book.genre}</span>
+          </div>
+          <div>
+            ${actionButtonHtml}
+          </div>
+        `;
+        booksGrid.appendChild(card);
+      });
+    }
+
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase().trim();
+      renderBooks(books.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)));
+    });
+
+    function openBorrowModal(bookId) {
+      selectedBookId = bookId;
+      const book = books.find(b => b.id === bookId);
+      document.getElementById('modalBookTitle').textContent = `Borrow: ${book.title}`;
+      document.getElementById('modalBookAuthor').textContent = `by ${book.author}`;
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('borrowDate').value = today;
+      
+      const retDate = new Date();
+      retDate.setDate(retDate.getDate() + 14);
+      document.getElementById('returnDate').value = retDate.toISOString().split('T')[0];
+
+      document.getElementById('borrowModal').classList.add('active');
+    }
+
+    function closeBorrowModal() {
+      document.getElementById('borrowModal').classList.remove('active');
+    }
+
+    document.getElementById('borrowForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const book = books.find(b => b.id === selectedBookId);
+      if (book) {
+        book.available = false;
+        book.status = "Active";
+
+        const newLog = {
+          id: Date.now(),
+          studentId: activeStudentId,
+          bookTitle: book.title,
+          borrowDate: document.getElementById('borrowDate').value,
+          returnDate: document.getElementById('returnDate').value,
+          status: "Active"
+        };
+
+        borrowLogs.unshift(newLog);
+        
+        saveData('pucu_books', books);
+        saveData('pucu_borrows', borrowLogs);
+
+        closeBorrowModal();
+        renderBooks(books);
+        renderProfileDues();
+        alert(`Successfully borrowed "${book.title}"!`);
+      }
+    });
+
+    function requestBook(bookId) {
+      const book = books.find(b => b.id === bookId);
+      if (book) {
+        const today = new Date().toISOString().split('T')[0];
+        studentRequests.unshift({
+          id: Date.now(),
+          studentId: activeStudentId,
+          bookTitle: book.title,
+          date: today,
+          status: 'Pending'
+        });
+
+        saveData('pucu_requests', studentRequests);
+        alert(`Hold request submitted for "${book.title}"! You will be notified when it becomes available.`);
+      }
+    }
+
+    // Initial render call on startup
+    renderBooks(books);
+    renderProfileDues();
+    renderHistory();
+    renderAnnouncements();
+    renderReminders();
+  </script>
+</body>
+</html>
